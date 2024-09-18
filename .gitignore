@@ -2,3 +2,4 @@ __pycache__
 venv
 website/__pycache__
 website/json/lineup.json
+.DS_Store
