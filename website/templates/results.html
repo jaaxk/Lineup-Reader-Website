@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Results</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../static/styles.css">
+
+    </head>
+    <body>
+        <h1 class=center>Results</h1>
+        <a href="/" class=center>Back to main</a>
+        <!--will need to change redirect_uri eventually--> 
+        <a href="https://accounts.spotify.com/authorize?response_type=code&client_id=335365bdd98b409a8070f5e604bd375a&redirect_uri=http://127.0.0.1:5000/make_playlist&scope=playlist-modify-public playlist-modify-private" class="center">Make Spotify Playlist</a>
+        <table>
+            <tr>
+                <th>Detected Name</th>
+                <th>Genres</th>
+                <th>Spotify Name</th>
+                <th>Top 3 Tracks</th>
+            </tr>
+            {% for i in results.get('Detected Name').keys() %}
+                <tr>
+                {% for key, val in results.items() if not key=='URIs' %}
+                    <td>{{val.get(i)}}</td>
+                
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        
+
+    </body>
+</html>
