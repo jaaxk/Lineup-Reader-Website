@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, redirect
+from flask import Flask, render_template, request, redirect, url_for
 from flask_cors import CORS
 import os
 from backend import get_dict, make_spotify_playlist
