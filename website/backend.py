@@ -1,6 +1,5 @@
 import easyocr
 import requests
-import pandas as pd
 import json
 import math
 
@@ -52,11 +51,23 @@ def get_dict(file_path):
                     break
             if not added:
                 update_lists(req.json()['artists']['items'][0]['name'], req.json()['artists']['items'][0]['genres'], req.json()['artists']['items'][0]['id'])
+    #Turn lists to dictionaries with index as key
+    detected_name_dict = {}
+    search_result_dict = {}
+    genres_dict = {}
+    top_tracks_dict = {}
+    top_track_uris_dict = {}
+    dicts = [detected_name_dict, search_result_dict, genres_dict, top_tracks_dict, top_track_uris_dict]
+    lists = [detected_name, search_result, genres, top_tracks, top_track_uris]
+    for dict, lst in zip(dicts, lists):
+        for i, val in enumerate(lst):
+            dict[i] = val
+    
+    #Combine dictionaries to one big result_dict
+    result_dict = {'Detected Name': detected_name_dict, 'Spotify Name': search_result_dict, 'Genres': 
+                   genres_dict, 'Top 3 Tracks': top_tracks_dict, 'URIs': top_track_uris_dict}
 
-    results_df = pd.DataFrame([detected_name, search_result, genres, top_tracks, top_track_uris]).T
-    results_df.columns = ['Detected Name', 'Spotify Name', 'Genres', 'Top 3 Tracks', 'URIs']
-    return results_df.to_dict()
-
+    return result_dict
 
 def make_spotify_playlist(path_to_json, code, playlist_name):
     auth_access_token = get_access_token(code)
