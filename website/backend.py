@@ -28,7 +28,7 @@ def get_dict(file_path):
         req = requests.get('https://api.spotify.com/v1/artists/'+id+'/top-tracks', headers=headers)
         top_tracks.append([])
         top_track_uris.append([])
-        for i in range(3):
+        for i in range(10):
             try:
                 top_tracks[-1].append(req.json()['tracks'][i]['name'])
                 top_track_uris[-1].append(req.json()['tracks'][i]['uri'])
@@ -65,8 +65,8 @@ def get_dict(file_path):
     
     #Combine dictionaries to one big result_dict
     result_dict = {'Detected Name': detected_name_dict, 'Spotify Name': search_result_dict, 'Genres': 
-                   genres_dict, 'Top 3 Tracks': top_tracks_dict, 'URIs': top_track_uris_dict}
-
+                   genres_dict, 'Top Tracks': top_tracks_dict, 'URIs': top_track_uris_dict}
+    print(result_dict)
     return result_dict
 
 def make_spotify_playlist(path_to_json, code, playlist_name):
@@ -92,8 +92,11 @@ def make_spotify_playlist(path_to_json, code, playlist_name):
     for artist in lineup_json['URIs']:
         for uri in lineup_json['URIs'].get(artist):
             track_uris.append(uri)
-    for i in range(math.floor(len(track_uris)/50)):
-        tracks_response = add_tracks(auth_access_token, playlist_id, track_uris[i*50:(i+1)*50])
+    if len(track_uris) > 50:
+        for i in range(math.floor(len(track_uris)/50)):
+            tracks_response = add_tracks(auth_access_token, playlist_id, track_uris[i*50:(i+1)*50])
+    else:
+        i=-1
     tracks_response = add_tracks(auth_access_token, playlist_id, track_uris[(i+1)*50:(i+1)*50 + len(track_uris)%50])
 
     return tracks_response
@@ -132,3 +135,48 @@ def add_tracks(auth_access_token, playlist_id, track_uris):
     }
     response = requests.post(url, headers=auth_headers, json=data)
     return response.json()
+
+def get_dict_with_params(num_tracks, filters):
+    print("num tracvs = " + num_tracks)
+    
+    with open('./website/json/lineup.json') as lineup_json:
+        lineup_dict = json.load(lineup_json)
+
+    try:
+        num_tracks=int(num_tracks)
+    except ValueError: #If 'static' is passed, dont do anything.
+        return lineup_dict
+    #Reduce num tracks and URIs
+    change_num_tracks(lineup_dict, num_tracks)
+    #Filter dictionary by given genre filters
+    if filters != 'none':
+        filters = filters.split(',')
+        filter_dict(lineup_dict, filters)
+
+    #Post updated dict to json folder
+    with open ('./website/json/lineup_updated.json', 'w') as outfile:
+       json.dump(lineup_dict, outfile)
+    return lineup_dict
+
+def change_num_tracks(lineup_dict, num_tracks):
+    tracks_and_uris = ['Top Tracks', 'URIs']
+    for col in tracks_and_uris:
+        trimmed_dict = {}
+        for key, val in lineup_dict.get(col).items():
+            trimmed_dict[key] = val[0:num_tracks]
+        lineup_dict[col] = trimmed_dict
+    return lineup_dict
+
+def filter_dict(lineup_dict, filters):
+    indices_to_keep = []
+    for key, val in lineup_dict.get('Genres').items():
+        for filter in filters:
+            for genre in val:
+                if filter in genre:
+                    indices_to_keep.append(key)
+    
+    for col, dict in lineup_dict.items():
+        for key in list(dict.keys()):
+            if key not in indices_to_keep:
+                lineup_dict[col].pop(key)
+    return lineup_dict

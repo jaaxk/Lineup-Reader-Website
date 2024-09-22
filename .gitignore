@@ -1,6 +1,7 @@
 __pycache__
 venv
-website/json/lineup.json
+website/json/*
+!website/json/.gitkeep
 **/.DS_Store
 website/upload_folder/*
 !website/upload_folder/.gitkeep
