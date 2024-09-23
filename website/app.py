@@ -24,7 +24,7 @@ def backend(filename):
 
 @app.route('/results/<num_tracks>/<filters>')
 def render_results(num_tracks, filters):
-    #num_tracks = request.args['num_tracks']
+
     lineup_dict = get_dict_with_params(num_tracks, filters)
     return render_template('results.html', results = lineup_dict)
 
@@ -48,8 +48,11 @@ def upload_image():
 @app.route('/make_playlist')
 def make_playlist():
     code = request.args.get('code')
-    make_spotify_playlist('./website/json/lineup_updated.json', code, 'Lineup Playlist')
-    return '<h1>Success!</h1>'
+    success = make_spotify_playlist('./website/json/lineup_updated.json', code, 'Lineup Playlist')
+    if success:
+        return '<h1>Success!</h1>'
+    else:
+        return '<h1>Failed</h1>'
 
 
 

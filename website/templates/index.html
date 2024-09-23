@@ -1,20 +1,64 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Music Festival Lineup Reader</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="../static/styles.css">
+  <title>Music Festival Lineup Reader</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../static/styles.css">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+
+  <script type="text/javascript">// <![CDATA[
+    function loading() {
+      $("#loading").show();
+      $("#content").hide();
+      console.log('Check')
+    }
+    // ]]></script>
 </head>
+
 <body style="max-width:1300px">
 
-<div class = center>
-      <h1>Upload File</h1>
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <input type="file" name="image" accept="*/*" required>
-            <button type="submit">Upload the file</button>
-        </form>
+  <div class=center>
+    <h1>Upload File</h1>
+    <div id="loading" class=center>
+      <h1>Loading...</h1>
+
+      <body>This may take up to a few minutes</body>
+    </div>
+    <div id="content">
+      <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" accept="*/*" required>
+        <button type="submit" onclick="loading();" class=button>Upload the file</button>
+      </form>
+    </div>
+  </div>
+  <div id="space"></div>
+  <div class="center">
+    <h1>About</h1>
+  </div>
+  <div id="about">
+
+    <body>
+      A problem I've always had when looking at a music festival lineup was trying to search all the artists I didn't
+      know on Spotify to see what type of genres will be played at the festival. This app is an easy way to see all the
+      genres that will be playing at your festival. There is also a feature to log into your spotify account and make a
+      playlist with all the top songs from the artists that will be playing. Just upload a file or search for a
+      festival, then you have the option to filter the results by genre and change the amount of songs per artist. Then
+      click the "Make Spotify Playlist" button to log in and make your playlist. <br><br>
+      The backend of this project is made coded with Python and uses Spotify and ChatGPT's APIs to find artists/make
+      playlists and to find lineups using AI, respectively. This project was a way for me to get familiar with full
+      stack web development using Flask. I learned a lot while developing this website and I plan on adding many more
+      features once I have the time.<br><br>
+      Future features I plan on adding:<br>
+      Improved UI with better design.<br>
+      Support for Apple Music and Soundcoud.<br>
+      Turning this into a social media platform where users can follow each other and see what festivals their friends<br>
+      are going to, trending festivals, and more.<br>
+    </body>
   </div>
 
+
 </body>
+
 </html>

@@ -7,14 +7,14 @@ client_id='335365bdd98b409a8070f5e604bd375a'
 client_secret='6e8d86f2cdba40d2bc7bbd8c1e92f7b1'
 redirect_uri = 'http://127.0.0.1:5000/make_playlist' #Change this eventually
 
-response = requests.post('https://accounts.spotify.com/api/token', data={'grant_type': 'client_credentials',
-                                                                            'client_id': client_id, 'client_secret': client_secret})
-access_token = response.json().get('access_token')
-headers = {'Authorization': 'Bearer '+access_token}
-
 def get_dict(file_path):
     reader = easyocr.Reader(['en', 'es'])
     result = reader.readtext(file_path)
+
+    response = requests.post('https://accounts.spotify.com/api/token', data={'grant_type': 'client_credentials',
+                                                                            'client_id': client_id, 'client_secret': client_secret})
+    access_token = response.json().get('access_token')
+    headers = {'Authorization': 'Bearer '+access_token}
 
     detected_name = []
     search_result = []
@@ -40,7 +40,7 @@ def get_dict(file_path):
         q = detection[1].replace(" ", "%20").replace('&', 'and').lower()
         req = requests.get('https://api.spotify.com/v1/search?q='+q+'&type=artist&limit=5',  
                         headers = headers)
-        #print(req.json())
+        
         if 'artists' in req.json() and req.json()['artists']['items'] != [] and detection[1].isupper():
             detected_name.append(detection[1])
             added=False
@@ -66,11 +66,13 @@ def get_dict(file_path):
     #Combine dictionaries to one big result_dict
     result_dict = {'Detected Name': detected_name_dict, 'Spotify Name': search_result_dict, 'Genres': 
                    genres_dict, 'Top Tracks': top_tracks_dict, 'URIs': top_track_uris_dict}
-    print(result_dict)
     return result_dict
 
 def make_spotify_playlist(path_to_json, code, playlist_name):
     auth_access_token = get_access_token(code)
+    print(auth_access_token)
+    if auth_access_token is None:
+        return False
     user_id = get_user_id(auth_access_token)
     url = f'https://api.spotify.com/v1/users/{user_id}/playlists'
     auth_headers = {
@@ -121,7 +123,9 @@ def get_user_id(auth_access_token):
     headers = {
         'Authorization': f'Bearer {auth_access_token}'
     }
+    
     response = requests.get(url, headers=headers)
+    print(response)
     return response.json()['uri'].split(':')[-1]
 
 def add_tracks(auth_access_token, playlist_id, track_uris):
@@ -137,7 +141,6 @@ def add_tracks(auth_access_token, playlist_id, track_uris):
     return response.json()
 
 def get_dict_with_params(num_tracks, filters):
-    print("num tracvs = " + num_tracks)
     
     with open('./website/json/lineup.json') as lineup_json:
         lineup_dict = json.load(lineup_json)

@@ -5,7 +5,44 @@ body {
 .center {
     text-align: center;
     color: white;
+    margin: auto;
+    padding:10px;
 }
 table {
     color: white;
+}
+div#loading {
+    display: none;
+    text-align: center;
+    background-color: #1B4F72;
+    cursor: wait;
+    padding: 25px;
+    width: 60%;
+    }
+div#content {
+    background-color: #1B4F72;
+    padding: 25px;
+    width: 60%;
+    margin: auto;
+}
+.button {
+    background-color: #002C93;
+    color: white;
+    padding: 10px;
+    border: none;
+    font-size: 15px;
+    
+}
+.button:hover {
+    background-color: #001F67;
+}
+div#about {
+    background-color: #1B4F72;
+    color: white;
+    width: 80%;
+    margin: auto;
+    padding: 10px;
+}
+div#space {
+    margin-bottom: 150px;
 }
