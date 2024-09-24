@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_cors import CORS
 import os
-from backend import get_dict, make_spotify_playlist, get_dict_with_params
+from backend import get_dict_from_image, get_dict_from_text, make_spotify_playlist, get_dict_with_params
 import json
 
 app = Flask(__name__)
@@ -14,9 +14,13 @@ CORS(app) #adds 'Access-Control-Allow-Origin: *' header to all responses, allowi
 def body():
     return render_template('index.html', results='Please Upload Lineup')
 
-@app.route('/backend/<filename>', methods=['GET'])
-def backend(filename):
-    dict = get_dict(f'./website/upload_folder/{filename}')
+@app.route('/backend/<method>/<content>', methods=['GET'])
+def backend(method, content):
+    if method == 'image':
+        dict = get_dict_from_image(f'./website/upload_folder/{content}')
+    if method == 'search':
+        dict = get_dict_from_text(content)
+        print(dict)
     with open ('./website/json/lineup.json', 'w') as outfile:
        json.dump(dict, outfile)
 
@@ -43,7 +47,12 @@ def upload_image():
     file = request.files['image']
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     file.save(file_path)
-    return redirect(url_for('backend', filename=file.filename))
+    return redirect(url_for('backend', method='image', content=file.filename))
+
+@app.route('/search')
+def search():
+    input_text = request.args['input_text']
+    return redirect(url_for('backend', method='search', content=input_text))
 
 @app.route('/make_playlist')
 def make_playlist():

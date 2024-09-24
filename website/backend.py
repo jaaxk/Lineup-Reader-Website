@@ -7,9 +7,57 @@ client_id='335365bdd98b409a8070f5e604bd375a'
 client_secret='6e8d86f2cdba40d2bc7bbd8c1e92f7b1'
 redirect_uri = 'http://127.0.0.1:5000/make_playlist' #Change this eventually
 
-def get_dict(file_path):
+def get_dict_from_image(file_path):
+    #Use EasyOCR to return list of artist names
     reader = easyocr.Reader(['en', 'es'])
     result = reader.readtext(file_path)
+    artists = []
+    for detection in result:
+        artists.append(detection[1])
+
+    return get_dict(artists)
+
+def get_dict_from_text(input_text):
+    #Use ChatGPT to return list of names based on input text
+    from googlesearch import Search
+    from bs4 import BeautifulSoup
+    import google.generativeai as genai
+    gemini_api_key="AIzaSyBQzQ1NpTYMfTKG3TsYzxzVk_SQTQx0nDI"
+    genai.configure(api_key=gemini_api_key)
+
+    def make_search(query:str):
+        sources = ''
+
+        try: 
+            search_results = Search(query, number_of_results=10).as_dict()['results']
+        except:
+            return []
+        for site in search_results:
+            response = requests.get(site['url'])
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            #filter out Cloudflare error pages
+            if 'Cloudflare' in str(soup):
+                continue
+            sources += 'Title = ' + site['title'] + ' Description = ' + site['description'] + 'HTML = ' + (str(soup)) + '____NEXT_SITE____'
+        return sources
+
+    sources = make_search(input_text+' music festival lineup')
+    if sources == []:
+        return []
+    prompt = f"Return only a list of all artists playing at {input_text} separated by commas. Use the following web sources to find this information. If the title and description does not seem relevent, skip this site and go to the next. Sites are seperated by '____NEXT_SITE____' If you absolutely cannot find anything return nothing: {sources}"
+    
+
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    response = model.generate_content(prompt)
+
+    artists = [x.lstrip(' ') for x in response.text.upper().split(',')]
+
+    return get_dict(artists)
+
+    
+def get_dict(artists):
+    
 
     response = requests.post('https://accounts.spotify.com/api/token', data={'grant_type': 'client_credentials',
                                                                             'client_id': client_id, 'client_secret': client_secret})
@@ -36,16 +84,16 @@ def get_dict(file_path):
                 break
 
 
-    for detection in result:
-        q = detection[1].replace(" ", "%20").replace('&', 'and').lower()
+    for artist in artists:
+        q = artist.replace(" ", "%20").replace('&', 'and').lower()
         req = requests.get('https://api.spotify.com/v1/search?q='+q+'&type=artist&limit=5',  
                         headers = headers)
         
-        if 'artists' in req.json() and req.json()['artists']['items'] != [] and detection[1].isupper():
-            detected_name.append(detection[1])
+        if 'artists' in req.json() and req.json()['artists']['items'] != [] and artist.isupper():
+            detected_name.append(artist)
             added=False
             for item in req.json()['artists']['items']:
-                if item['name'].lower() == detection[1].lower():
+                if item['name'].lower() == artist.lower():
                     update_lists(item['name'], item['genres'], item['id'])
                     added=True
                     break
@@ -70,7 +118,6 @@ def get_dict(file_path):
 
 def make_spotify_playlist(path_to_json, code, playlist_name):
     auth_access_token = get_access_token(code)
-    print(auth_access_token)
     if auth_access_token is None:
         return False
     user_id = get_user_id(auth_access_token)
@@ -116,6 +163,7 @@ def get_access_token(code):
         'client_secret': client_secret
     }
     response = requests.post(token_url, headers=auth_headers, data=data)
+    print(response)
     return response.json().get('access_token')
 
 def get_user_id(auth_access_token):
