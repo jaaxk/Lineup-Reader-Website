@@ -3,8 +3,13 @@ import requests
 import json
 import math
 
+secrets = open('secrets.txt', 'r').read().split()
+
+#Add your secrets here:
+client_secret=secrets[1]
+gemini_api_key=secrets[3]
+
 client_id='335365bdd98b409a8070f5e604bd375a'
-client_secret='6e8d86f2cdba40d2bc7bbd8c1e92f7b1'
 redirect_uri = 'http://127.0.0.1:5000/make_playlist' #Change this eventually
 
 def get_dict_from_image(file_path):
@@ -22,7 +27,7 @@ def get_dict_from_text(input_text):
     from googlesearch import Search
     from bs4 import BeautifulSoup
     import google.generativeai as genai
-    gemini_api_key="AIzaSyBQzQ1NpTYMfTKG3TsYzxzVk_SQTQx0nDI"
+    
     genai.configure(api_key=gemini_api_key)
 
     def make_search(query:str):
