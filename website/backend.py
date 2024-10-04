@@ -2,12 +2,13 @@ import easyocr
 import requests
 import json
 import math
+from dotenv import load_dotenv
+import os
 
-secrets = open('secrets.txt', 'r').read().split()
-
+load_dotenv()
 #Add your secrets here:
-client_secret=secrets[1]
-gemini_api_key=secrets[3]
+client_secret=str(os.getenv('SPOTIFY'))
+gemini_api_key=str(os.getenv('GEMINI'))
 
 client_id='335365bdd98b409a8070f5e604bd375a'
 redirect_uri = 'http://127.0.0.1:5000/make_playlist' #Change this eventually
@@ -55,7 +56,7 @@ def get_dict_from_text(input_text):
 
     model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content(prompt)
-
+    print(response)
     artists = [x.lstrip(' ') for x in response.text.upper().split(',')]
 
     return get_dict(artists)

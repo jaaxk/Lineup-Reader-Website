@@ -1,8 +1,7 @@
-secrets.txt
-__pycache__
-venv
+.DS_Store
+venv/
+website/.DS_Store
+website/.env
+website/__pycache__/
 website/json/*
-!website/json/.gitkeep
-**/.DS_Store
 website/upload_folder/*
-!website/upload_folder/.gitkeep
